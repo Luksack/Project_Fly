@@ -14,7 +14,7 @@ def get_ticket_price():
     information = requests.get(api_url, headers=headers)
 
     if information.status_code == 200:
-        return json.loads(information.content.decode('utf-8'))
+        return json.loads(information.content)
     else:
         return None
 
@@ -24,6 +24,6 @@ price_info = get_ticket_price()
 if price_info is not None:
     print("Here's your info: ")
     for key, value in price_info.items():
-        print('{0}:{1}'.format(key, value))
+        print('{0}: {1}'.format(key, value).encode('utf-8'))
 else:
     print("[!] Request Failed")
