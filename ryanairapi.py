@@ -1,6 +1,7 @@
 import json
 import requests
 import csv
+import time
 
 headers = {'Content-Type': 'application/json'}
 
@@ -19,15 +20,27 @@ def get_ticket_price():
     else:
         return None
 
-price_info = get_ticket_price()
 
-if price_info is not None:
-    for key, value in price_info['fares'][0]['outbound'].items():
-        print('{0}: {1}'.format(key, value).replace('\u0142', ''), '\n')
-        save = open('test.csv', 'a')
-        save.write('{0}: {1}{2}'.format(key, value, '\n').replace('\u0142', ''))
-        save.close()
-       
+flight_info = get_ticket_price()
+
+if flight_info is not None:
+    scrap_time = time.asctime(time.localtime(time.time()))
+    departureAirport = flight_info['fares'][0]['outbound']['departureAirport']['name']
+    departureCode = flight_info['fares'][0]['outbound']['departureAirport']['iataCode']
+    arrivalAirport = flight_info['fares'][0]['outbound']['arrivalAirport']['name']
+    arrivalCode = flight_info['fares'][0]['outbound']['arrivalAirport']['iataCode']
+    departureDate = flight_info['fares'][0]['outbound']['departureDate']
+    price = flight_info['fares'][0]['outbound']['price']['value']
+    price_currency = flight_info['fares'][0]['outbound']['price']['currencyCode']
+    csv_information = [["Execution Time","Departure Airport", "Departure Code", "Arrival Airport", "Arrival Code", "Departure Date", "Price",
+             "Currency"],
+            [scrap_time, departureAirport, departureCode, arrivalAirport, arrivalCode, departureDate, price, price_currency]]
+
+    file = open('test.csv', 'a')
+    with file:
+        writer = csv.writer(file)
+        writer.writerows(csv_information)
+
+
 else:
     print("[!] Request Failed")
-
