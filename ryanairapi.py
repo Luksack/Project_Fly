@@ -2,6 +2,7 @@ import json
 import requests
 import csv
 import time
+import os.path
 
 headers = {'Content-Type': 'application/json'}
 
@@ -25,21 +26,48 @@ flight_info = get_ticket_price()
 
 if flight_info is not None:
     scrap_time = time.asctime(time.localtime(time.time()))
-    departureAirport = flight_info['fares'][0]['outbound']['departureAirport']['name']
-    departureCode = flight_info['fares'][0]['outbound']['departureAirport']['iataCode']
-    arrivalAirport = flight_info['fares'][0]['outbound']['arrivalAirport']['name']
-    arrivalCode = flight_info['fares'][0]['outbound']['arrivalAirport']['iataCode']
-    departureDate = flight_info['fares'][0]['outbound']['departureDate']
+    departure_airport = flight_info['fares'][0]['outbound']['departureAirport']['name']
+    departure_code = flight_info['fares'][0]['outbound']['departureAirport']['iataCode']
+    arrival_airport = flight_info['fares'][0]['outbound']['arrivalAirport']['name']
+    arrival_code = flight_info['fares'][0]['outbound']['arrivalAirport']['iataCode']
+    departure_date = flight_info['fares'][0]['outbound']['departureDate']
+    arrival_date = flight_info['fares'][0]['outbound']['arrivalDate']
     price = flight_info['fares'][0]['outbound']['price']['value']
     price_currency = flight_info['fares'][0]['outbound']['price']['currencyCode']
-    csv_information = [["Execution Time","Departure Airport", "Departure Code", "Arrival Airport", "Arrival Code", "Departure Date", "Price",
-             "Currency"],
-            [scrap_time, departureAirport, departureCode, arrivalAirport, arrivalCode, departureDate, price, price_currency]]
 
-    file = open('test.csv', 'a')
-    with file:
-        writer = csv.writer(file)
-        writer.writerows(csv_information)
+    if not os.path.isfile('test.csv'):
+        print("Generating file...Please wait...")
+        with open('test.csv', 'a') as file:
+            my_fields = ['Execution Time', 'Departure Airport', 'Departure Code', 'Arrival Airport', 'Arrival Code',
+                         'Departure Date','Arrival Date', 'Price', 'Currency']
+            writer = csv.DictWriter(file, fieldnames=my_fields)
+            writer.writeheader()
+            writer.writerow({'Execution Time': scrap_time,
+                             'Departure Airport': departure_airport,
+                             'Departure Code': departure_code,
+                             'Arrival Airport': arrival_airport,
+                             'Arrival Code': arrival_code,
+                             'Departure Date': departure_date,
+                             'Arrival Date': arrival_date,
+                             'Price': price,
+                             'Currency': price_currency,
+                             })
+            print("File Generated")
+    else:
+        with open('test.csv', 'a') as file:
+            data = [scrap_time,
+                    departure_airport,
+                    departure_code,
+                    arrival_airport,
+                    arrival_code,
+                    departure_date,
+                    arrival_date,
+                    price,
+                    price_currency
+                    ]
+            writer = csv.writer(file)
+            writer.writerow(data)
+            print("Information added successfully")
 
 
 else:
